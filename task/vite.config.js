@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      external: ['chart.js']
+      external: ['chart.js', 'react-chartjs-2']
     }
   }
 })
