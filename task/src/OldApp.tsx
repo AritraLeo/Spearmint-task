@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Chart from 'chart.js/auto'; // Import Chart.js
+import React, { useState, useEffect } from 'react';
+import { Chart as ChartJS, LineElement, PointElement, LinearScale, CategoryScale } from 'chart.js';
+import { Line } from 'react-chartjs-2';
+
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale);
 
 function App() {
-  const chartRef = useRef(null);
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [
@@ -37,7 +39,7 @@ function App() {
       const labels = slicedXData.map((item) => item.Label || 'Label');
 
       const yValues = slicedYData.map((item) => parseFloat(item.RandomNumber));
-      const xValues = slicedXData.map((item) => parseFloat(item.RandomNumber));
+      const xValues = slicedXData.map((item) => parseFloat(item.RandomNumber)); 
 
       setChartData({
         labels,
@@ -51,42 +53,36 @@ function App() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (chartRef.current) {
-      const ctx = chartRef.current.getContext('2d');
+  const handlePointClick = (event, elements) => {
+    if (elements.length > 0) {
+      const index = elements[0].index;
+      const label = chartData.labels[index];
+      console.log(`Label: ${label}`);
+    }
+  };
 
-      // Destroy existing chart before creating a new one
-      if (chartRef.current.chart) {
-        chartRef.current.chart.destroy();
-      }
-
-      chartRef.current.chart = new Chart(ctx, {
-        type: 'line',
-        data: chartData,
-        options: {
+  return (
+    <div className="App" style={{ width: '100vw', height: '100vh' }}>
+      <h2>Chart</h2>
+      <Line
+        data={chartData}
+        options={{
+          onHover: handlePointClick,
           plugins: {
             tooltip: {
               callbacks: {
                 label: (context) => {
                   const labelIndex = context.dataIndex;
+                  const datasetIndex = context.datasetIndex;
                   return `Label: ${chartData.labels[labelIndex]}`;
                 },
               },
             },
           },
-        },
-      });
-    }
-  }, [chartData]);
-
-  return (
-    <div className="App" style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-  <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Chart Task</h1>
-  <div style={{ width: '100vw', maxWidth: '800px', height: '80%', maxHeight: '600px' }}>
-    <canvas ref={chartRef} /> {/* Remove width and height styles */}
-  </div>
-</div>
-
+        }}
+        style={{ width: '100%', height: '100%' }}
+      />
+    </div>
   );
 }
 
